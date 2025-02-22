@@ -1,57 +1,92 @@
-  <script lang="ts">
-  import { defineComponent, ref, watch, computed } from 'vue'
-  
-  export default defineComponent({
-    name: 'EditCardModal',
-    props: {
-      card: { 
-        type: Object, 
-        default: () => ({ title: '', description: '' }) 
-      },
-      columnId: { type: Number, required: true }
+<script lang="ts">
+import { defineComponent, ref, watch, computed } from 'vue'
+import type { PropType } from 'vue'
+
+interface Card {
+  id: number
+  title: string
+  description: string
+  columnId: number
+}
+
+export default defineComponent({
+  name: 'EditCardModal',
+  props: {
+    card: {
+      type: Object as PropType<Card | null>,
+      default: null
     },
-    emits: ['save', 'close'],
-    setup(props, { emit }) {
-      const dialog = ref(true)
-      const localCard = ref({ ...props.card })
-  
-      watch(() => props.card, newVal => {
-        localCard.value = { ...newVal }
-      })
-  
-      const isEdit = computed(() => !!localCard.value.id)
-  
-      const close = () => {
-        dialog.value = false
+    columnId: {
+      type: Number,
+      required: true
+    }
+  },
+  emits: ['save', 'close'],
+  setup(props, { emit }) {
+    // Opret en lokal kopi af card til redigering
+    const localCard = ref<Card>({
+      id: props.card?.id || 0,
+      title: props.card?.title || '',
+      description: props.card?.description || '',
+      columnId: props.columnId
+    })
+
+    // Hold øje med ændringer i card-proppen
+    watch(
+      () => props.card,
+      (newCard) => {
+        localCard.value = {
+          id: newCard?.id || 0,
+          title: newCard?.title || '',
+          description: newCard?.description || '',
+          columnId: props.columnId
+        }
+      },
+      { immediate: true }
+    )
+
+    // Brug en lokal boolean til at styre dialogens synlighed
+    const dialog = ref(true)
+    // Når dialogen lukkes, emitter vi close-event
+    watch(dialog, (val) => {
+      if (!val) {
         emit('close')
       }
-  
-      const save = () => {
-        emit('save', { ...localCard.value, columnId: props.columnId })
-      }
-  
-      return { dialog, localCard, isEdit, close, save }
+    })
+
+    const isEdit = computed(() => localCard.value.id !== 0)
+
+    const save = () => {
+      emit('save', localCard.value)
+      dialog.value = false
     }
-  })
-  </script>
-  
-  <template>
-    <v-dialog v-model="dialog" persistent max-width="600px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ isEdit ? 'Rediger kort' : 'Nyt kort' }}</span>
-        </v-card-title>
-        <v-card-text>
-          <v-text-field v-model="localCard.title" label="Titel"></v-text-field>
-          <v-textarea v-model="localCard.description" label="Beskrivelse"></v-textarea>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="close">Annuller</v-btn>
-          <v-btn color="blue darken-1" text @click="save">Gem</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </template>
-  
-  
+
+    return {
+      localCard,
+      dialog,
+      isEdit,
+      save,
+      close: () => { dialog.value = false }
+    }
+  }
+})
+</script>
+
+<template>
+  <v-dialog v-model="dialog" persistent max-width="600px">
+    <v-card>
+      <v-card-title>
+        <span class="headline">{{ isEdit ? 'Rediger kort' : 'Nyt kort' }}</span>
+      </v-card-title>
+      <v-card-text>
+        <v-text-field v-model="localCard.title" label="Titel" />
+        <v-textarea v-model="localCard.description" label="Beskrivelse" />
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn variant="text" color="blue darken-1" @click="close">Annuller</v-btn>
+        <v-btn variant="text" color="blue darken-1" @click="save">Gem</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</template>
