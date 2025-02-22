@@ -71,13 +71,13 @@ export default defineComponent({
     }
 
     // Forbered redigering af kort
-    const handleEdit = (card: Card) => () => {
+    const handleEdit = (card: Card) => {
       selectedCard.value = card
       showModal.value = true
     }
 
     // Forbered sletning af kort
-    const handleDelete = (card: Card) => () => {
+    const handleDelete = (card: Card) => {
       emit('delete-card', card)
     }
 
