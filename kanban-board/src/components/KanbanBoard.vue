@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue'
 import KanbanColumn from './KanbanColumn.vue'
 import { useKanban } from '../composables/useKanban'
-import type { Card, Column } from '../composables/useKanban'
+import type { Card,} from '../composables/useKanban'
 
 export default defineComponent({
   name: 'KanbanBoard',
