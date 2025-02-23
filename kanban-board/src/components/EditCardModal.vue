@@ -23,7 +23,7 @@ export default defineComponent({
   },
   emits: ['save', 'close'],
   setup(props, { emit }) {
-    // Opret en lokal kopi af card til redigering
+
     const localCard = ref<Card>({
       id: props.card?.id || 0,
       title: props.card?.title || '',
@@ -31,7 +31,7 @@ export default defineComponent({
       columnId: props.columnId
     })
 
-    // Hold øje med ændringer i card-proppen
+    
     watch(
       () => props.card,
       (newCard) => {
@@ -45,9 +45,9 @@ export default defineComponent({
       { immediate: true }
     )
 
-    // Brug en lokal boolean til at styre dialogens synlighed
+    
     const dialog = ref(true)
-    // Når dialogen lukkes, emitter vi close-event
+    
     watch(dialog, (val) => {
       if (!val) {
         emit('close')

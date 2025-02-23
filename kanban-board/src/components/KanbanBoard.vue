@@ -2,24 +2,32 @@
 import { defineComponent } from 'vue'
 import KanbanColumn from './KanbanColumn.vue'
 import { useKanban } from '../composables/useKanban'
+import type { Card, Column } from '../composables/useKanban'
 
 export default defineComponent({
   name: 'KanbanBoard',
   components: { KanbanColumn },
   setup() {
-    const { columns, cards, addCard, editCard, deleteCard, moveCard } = useKanban()
+    const { columns, cards, addCard, editCard, deleteCard } = useKanban()
 
+    
     const cardsByColumn = (columnId: number) =>
-      cards.value.filter(card => card.columnId === columnId)
+      cards.value.filter((card: Card) => card.columnId === columnId)
+
+    const handleMoveCard = ({ card, newColumnId }: { card: Card; newColumnId: number }) => {
+      // Fjern kortet fra den globale liste (den gamle kolonne)
+      cards.value = cards.value.filter((c: Card) => c.id !== card.id)
+      // Tilføj kortet med opdateret columnId
+      cards.value.push({ ...card, columnId: newColumnId })
+    }
 
     return {
       columns,
-      cards,
+      cardsByColumn,
       addCard,
       editCard,
       deleteCard,
-      moveCard,
-      cardsByColumn
+      handleMoveCard
     }
   }
 })
@@ -36,7 +44,7 @@ export default defineComponent({
         @add-card="addCard"
         @edit-card="editCard"
         @delete-card="deleteCard"
-        @move-card="moveCard"
+        @move-card="handleMoveCard"
       />
     </v-row>
   </v-container>

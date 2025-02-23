@@ -2,7 +2,6 @@
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 
-// Samme Card-interface (eller hent det fra en fælles fil, hvis du foretrækker)
 interface Card {
   id: number
   title: string

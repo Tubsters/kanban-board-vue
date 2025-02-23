@@ -20,7 +20,7 @@ export function useKanban() {
   ])
 
   const cards = ref<Card[]>([
-    { id: 1, title: 'Test kort', description: 'Dette er et test kort', columnId: 1 }
+    { id: 1, title: 'Test Kort', description: 'Dette er et test kort', columnId: 2 }
   ])
 
   let nextId = 2
@@ -46,12 +46,11 @@ export function useKanban() {
     cards.value = cards.value.filter(c => c.id !== card.id)
   }
 
-  const moveCard = ({ cards: movedCards, columnId }: { cards: Card[], columnId: number }) => {
-    movedCards.forEach(card => {
-      card.columnId = columnId
-      const index = cards.value.findIndex(c => c.id === card.id)
-      if(index !== -1) {
-        cards.value[index] = card
+  const moveCard = ({ cards: movedCards, columnId }: { cards: Card[]; columnId: number }) => {
+    movedCards.forEach(movedCard => {
+      const index = cards.value.findIndex(c => c.id === movedCard.id)
+      if (index !== -1) {
+        cards.value[index].columnId = columnId
       }
     })
   }
