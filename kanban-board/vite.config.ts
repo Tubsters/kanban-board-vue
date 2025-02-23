@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  base: './', // Sørger for korrekt base-path
-  server: {
-    port: 5173, // Kan være valgfrit
+  base: './',  // Brug relative stier for at undgå 404 på deployment
+  build: {
+    outDir: 'dist'
   }
 })
