@@ -39,13 +39,11 @@ export default defineComponent({
     const showModal = ref(false)
     const selectedCard = ref<Card | null>(null)
     const localCards = ref<Card[]>([...props.cards])
+    const isOver = ref(false)
 
-    watch(
-      () => props.cards,
-      (newCards) => {
-        localCards.value = [...newCards]
-      }
-    )
+    watch(() => props.cards, (newCards) => {
+      localCards.value = [...newCards]
+    })
 
     const openAddCardDialog = () => {
       selectedCard.value = null
@@ -76,39 +74,61 @@ export default defineComponent({
     }
 
     const onDragEnd = (event: any) => {
-  const { oldIndex, newIndex } = event
-  if (oldIndex === newIndex) return 
+      const { oldIndex, newIndex } = event
+      if (oldIndex === newIndex) return 
+      const movedCard = localCards.value[newIndex]
+      if (movedCard) {
+        emit('move-card', { card: movedCard, newColumnId: props.column.id })
+      }
+    }
 
-  const movedCard = localCards.value[newIndex]
-  
-  if (movedCard) {
-    emit('move-card', { card: movedCard, newColumnId: props.column.id })
-  }
-}
+    const onDragEnter = () => { isOver.value = true }
+    const onDragOver = (event: DragEvent) => { 
+      event.preventDefault()
+      isOver.value = true 
+    }
+    const onDragLeave = () => { isOver.value = false }
+    const onDrop = (event: DragEvent) => { 
+      event.preventDefault()
+      isOver.value = false 
+    }
 
     return {
       showModal,
       selectedCard,
       localCards,
+      isOver,
       openAddCardDialog,
       handleSave,
       handleEdit,
       handleDelete,
       closeModal,
-      onDragEnd
+      onDragEnd,
+      onDragEnter,
+      onDragOver,
+      onDragLeave,
+      onDrop
     }
   }
 })
 </script>
 
 <template>
-  <v-col cols="4">
+  <v-col cols="4"
+         class="drop-zone"
+         @dragenter="onDragEnter"
+         @dragover="onDragOver"
+         @dragleave="onDragLeave"
+         @drop="onDrop"
+         :class="{ 'drop-active': isOver }">
     <v-card class="mb-4">
       <v-card-title>{{ column.title }}</v-card-title>
       <v-card-text>
         <draggable
           v-model="localCards"
           :group="{ name: 'kanban' }"
+          :animation="200"
+          :fallbackTolerance="20"
           @end="onDragEnd"
         >
           <template #item="{ element }">
@@ -124,7 +144,6 @@ export default defineComponent({
         <v-btn small @click="openAddCardDialog">Tilføj kort</v-btn>
       </v-card-actions>
     </v-card>
-
     <EditCardModal
       v-if="showModal"
       :card="selectedCard"
@@ -134,3 +153,17 @@ export default defineComponent({
     />
   </v-col>
 </template>
+
+<style scoped>
+.drop-zone {
+  /*drop area */
+  min-height: 300px;
+  padding: 1.5rem;
+  transition: background-color 0.2s ease, border 0.2s ease;
+}
+
+.drop-active {
+  border: 2px dashed #1976d2;
+  background-color: rgba(25, 118, 210, 0.1);
+}
+</style>
